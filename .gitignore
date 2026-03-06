@@ -1,0 +1,15 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+venv/
+*.log
+db.sqlite3
+media/firmas/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
