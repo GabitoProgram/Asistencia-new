@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api';
 
 export default function Dashboard() {
+  const [clock, setClock] = useState(new Date());
   const [data, setData] = useState(null);
   const [charts, setCharts] = useState(null);
   const [filters, setFilters] = useState({
@@ -14,6 +15,8 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
     fetchCharts();
+    const timer = setInterval(() => setClock(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   const fetchData = async (f = filters) => {
@@ -72,9 +75,20 @@ export default function Dashboard() {
           </h2>
           <p className="text-muted mb-0">Panel de control de asistencias</p>
         </div>
-        <span className="badge px-3 py-2" style={{ background: 'rgba(26,31,113,0.1)', color: '#1a1f71' }}>
-          <i className="bi bi-calendar3 me-1"></i>{data?.fecha_hoy}
-        </span>
+        <div className="text-end">
+          <div className="px-3 py-2 d-inline-block" style={{
+            background: 'rgba(26,31,113,0.08)', borderRadius: 12
+          }}>
+            <div className="fw-bold" style={{ color: '#1a1f71', fontSize: '1.5rem', lineHeight: 1.2 }}>
+              <i className="bi bi-clock me-1"></i>
+              {clock.toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </div>
+            <div className="text-muted" style={{ fontSize: '0.85rem' }}>
+              <i className="bi bi-calendar3 me-1"></i>
+              {clock.toLocaleDateString('es-BO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Métricas */}

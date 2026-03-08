@@ -15,7 +15,7 @@ export default function ListaDoctores() {
 
   useEffect(() => {
     fetchDoctores();
-    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -95,9 +95,9 @@ export default function ListaDoctores() {
   return (
     <>
       {/* Encabezado */}
-      <div className="row mb-4">
-        <div className="col">
-          <h2 className="fw-bold text-dark">
+      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+          <h2 className="fw-bold text-dark mb-1">
             <i className="bi bi-people-fill me-2" style={{ color: '#1a1f71' }}></i>
             Control de Asistencia
           </h2>
@@ -105,6 +105,20 @@ export default function ListaDoctores() {
             <i className="bi bi-calendar3 me-1"></i>
             {fechaFormateada} — {DIAS[data.dia_semana]}
           </p>
+        </div>
+        <div className="text-end">
+          <div className="px-3 py-2 d-inline-block" style={{
+            background: 'rgba(26,31,113,0.08)', borderRadius: 12
+          }}>
+            <div className="fw-bold" style={{ color: '#1a1f71', fontSize: '1.5rem', lineHeight: 1.2 }}>
+              <i className="bi bi-clock me-1"></i>
+              {currentTime.toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </div>
+            <div className="text-muted" style={{ fontSize: '0.85rem' }}>
+              <i className="bi bi-calendar3 me-1"></i>
+              {currentTime.toLocaleDateString('es-BO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </div>
+          </div>
         </div>
       </div>
 
