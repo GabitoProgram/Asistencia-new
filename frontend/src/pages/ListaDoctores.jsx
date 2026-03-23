@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import SignaturePad from 'signature_pad';
 import api from '../api';
 
-const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const DIAS_JS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 export default function ListaDoctores() {
   const [data, setData] = useState({ doctores_info: [], fecha_hoy: '', dia_semana: 0 });
@@ -12,6 +12,8 @@ export default function ListaDoctores() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const canvasRef = useRef(null);
   const padRef = useRef(null);
+  const videoRef = useRef(null);
+  const cameraStreamRef = useRef(null);
 
   useEffect(() => {
     fetchDoctores();
@@ -31,8 +33,62 @@ export default function ListaDoctores() {
         minWidth: 1,
         maxWidth: 3,
       });
+
+      iniciarCamara().catch((err) => {
+        console.error('No se pudo iniciar la cámara:', err);
+      });
+    } else {
+      detenerCamara();
     }
+
+    return () => {
+      if (!modal) return;
+      detenerCamara();
+      padRef.current = null;
+    };
   }, [modal]);
+
+  const iniciarCamara = async () => {
+    if (cameraStreamRef.current) return;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      throw new Error('Este dispositivo no permite acceso a cámara.');
+    }
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user' },
+      audio: false,
+    });
+    cameraStreamRef.current = stream;
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+      await videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const detenerCamara = () => {
+    if (!cameraStreamRef.current) return;
+    cameraStreamRef.current.getTracks().forEach((track) => track.stop());
+    cameraStreamRef.current = null;
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  const capturarFotoConTimeout = async (timeoutMs = 4000) => {
+    const inicio = Date.now();
+    while (Date.now() - inicio < timeoutMs) {
+      const video = videoRef.current;
+      if (video && video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0) {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/png');
+      }
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+    throw new Error('No se pudo capturar la foto. Verifique permisos de cámara.');
+  };
 
   const fetchDoctores = async () => {
     try {
@@ -66,13 +122,17 @@ export default function ListaDoctores() {
     setSaving(true);
     try {
       const firmaBase64 = padRef.current.toDataURL('image/png');
+      const fotoBase64 = await capturarFotoConTimeout(4000);
+
       await api.post(`/firmar/${modal.doctorId}/${modal.horarioId}/${modal.tipo}/`, {
         firma: firmaBase64,
+        foto: fotoBase64,
       });
       setModal(null);
+      detenerCamara();
       fetchDoctores();
     } catch (err) {
-      alert(err.response?.data?.error || 'Error al guardar la firma');
+      alert(err.response?.data?.error || err.message || 'Error al guardar la firma y foto');
     } finally {
       setSaving(false);
     }
@@ -86,11 +146,11 @@ export default function ListaDoctores() {
     );
   }
 
-  const fechaFormateada = data.fecha_hoy
-    ? new Date(data.fecha_hoy + 'T12:00:00').toLocaleDateString('es-BO', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-      })
-    : '';
+  const fechaReferencia = data.fecha_hoy ? new Date(`${data.fecha_hoy}T12:00:00`) : currentTime;
+  const fechaFormateada = fechaReferencia.toLocaleDateString('es-BO', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  const diaSemanaTexto = DIAS_JS[fechaReferencia.getDay()];
 
   return (
     <>
@@ -103,7 +163,7 @@ export default function ListaDoctores() {
           </h2>
           <p className="text-muted mb-0">
             <i className="bi bi-calendar3 me-1"></i>
-            {fechaFormateada} — {DIAS[data.dia_semana]}
+            {fechaFormateada} — {diaSemanaTexto}
           </p>
         </div>
         <div className="text-end">
@@ -254,9 +314,10 @@ export default function ListaDoctores() {
                 }}>
                   <canvas ref={canvasRef} style={{ width: '100%', height: 250, cursor: 'crosshair', touchAction: 'none' }}></canvas>
                 </div>
+                <video ref={videoRef} autoPlay playsInline muted style={{ display: 'none' }}></video>
                 <div className="d-flex justify-content-between align-items-center">
                   <small className="text-muted">
-                    <i className="bi bi-info-circle me-1"></i>Use el mouse o lápiz digital para firmar
+                    <i className="bi bi-info-circle me-1"></i>Use el mouse o lápiz digital para firmar. Al guardar se capturará foto de validación.
                   </small>
                   <button className="btn btn-outline-secondary btn-sm" onClick={limpiarFirma}>
                     <i className="bi bi-eraser me-1"></i>Limpiar
@@ -267,7 +328,7 @@ export default function ListaDoctores() {
                 <button className="btn btn-secondary" onClick={() => setModal(null)} disabled={saving}>Cancelar</button>
                 <button className="btn btn-primary fw-bold px-4" onClick={guardarFirma} disabled={saving}>
                   {saving ? (
-                    <><span className="spinner-border spinner-border-sm me-2"></span>Guardando...</>
+                    <><span className="spinner-border spinner-border-sm me-2"></span>Guardando firma y foto (3-4 segundos)...</>
                   ) : (
                     <><i className="bi bi-save me-1"></i>Guardar Firma</>
                   )}

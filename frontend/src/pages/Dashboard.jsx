@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
 
+function fechaLocalISO(dateObj = new Date()) {
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+  const day = String(dateObj.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default function Dashboard() {
   const [clock, setClock] = useState(new Date());
+  const hoyLocal = new Date();
+  const hace30Local = new Date(hoyLocal);
+  hace30Local.setDate(hoyLocal.getDate() - 30);
   const [data, setData] = useState(null);
   const [charts, setCharts] = useState(null);
   const [filters, setFilters] = useState({
-    fecha_desde: new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0],
-    fecha_hasta: new Date().toISOString().split('T')[0],
+    fecha_desde: fechaLocalISO(hace30Local),
+    fecha_hasta: fechaLocalISO(hoyLocal),
     doctor_id: '',
   });
   const [loading, setLoading] = useState(true);
@@ -220,14 +230,16 @@ export default function Dashboard() {
                   <th>Turno</th>
                   <th>Hora Entrada</th>
                   <th>Firma Entrada</th>
+                  <th>Foto Entrada</th>
                   <th>Hora Salida</th>
                   <th>Firma Salida</th>
+                  <th>Foto Salida</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.asistencias?.length === 0 ? (
                   <tr>
-                    <td colSpan="8" className="text-center py-4 text-muted">
+                    <td colSpan="10" className="text-center py-4 text-muted">
                       <i className="bi bi-inbox fs-3 d-block mb-2"></i>
                       No hay registros para el rango seleccionado
                     </td>
@@ -260,6 +272,13 @@ export default function Dashboard() {
                         ) : <span className="text-muted">—</span>}
                       </td>
                       <td>
+                        {a.foto_entrada ? (
+                          <img src={`/media/${a.foto_entrada}`} alt="Foto entrada"
+                            style={{ width: 80, height: 60, objectFit: 'cover', border: '1px solid #e2e8f0', borderRadius: 6 }}
+                            loading="lazy" />
+                        ) : <span className="text-muted">—</span>}
+                      </td>
+                      <td>
                         {a.hora_salida ? (
                           <span className="fw-semibold" style={{ color: '#8b1a1a' }}>
                             {new Date(a.hora_salida).toLocaleTimeString('es-BO')}
@@ -270,6 +289,13 @@ export default function Dashboard() {
                         {a.firma_salida ? (
                           <img src={`/media/${a.firma_salida}`} alt="Firma"
                             style={{ width: 80, height: 40, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer' }}
+                            loading="lazy" />
+                        ) : <span className="text-muted">—</span>}
+                      </td>
+                      <td>
+                        {a.foto_salida ? (
+                          <img src={`/media/${a.foto_salida}`} alt="Foto salida"
+                            style={{ width: 80, height: 60, objectFit: 'cover', border: '1px solid #e2e8f0', borderRadius: 6 }}
                             loading="lazy" />
                         ) : <span className="text-muted">—</span>}
                       </td>

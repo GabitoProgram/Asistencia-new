@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { useAuth } from '../context/AuthContext';
 
 export default function GestionarAdmins() {
   const [admins, setAdmins] = useState([]);
@@ -10,8 +9,6 @@ export default function GestionarAdmins() {
   const [crearForm, setCrearForm] = useState({ username: '', email: '', password: '', password2: '' });
   const [passModal, setPassModal] = useState(null);
   const [passForm, setPassForm] = useState({ new_password: '', new_password2: '' });
-  const { user } = useAuth();
-
   useEffect(() => { fetchAdmins(); }, []);
 
   const fetchAdmins = async () => {
@@ -44,17 +41,6 @@ export default function GestionarAdmins() {
       setPassForm({ new_password: '', new_password2: '' });
     } catch (err) {
       setMsg({ type: 'danger', text: err.response?.data?.error || 'Error al cambiar contraseña.' });
-    }
-  };
-
-  const handleEliminar = async (admin) => {
-    if (!confirm(`¿Eliminar al administrador "${admin.username}"?`)) return;
-    try {
-      await api.delete(`/admins/${admin.id}/eliminar/`);
-      setMsg({ type: 'success', text: `Administrador "${admin.username}" eliminado.` });
-      fetchAdmins();
-    } catch (err) {
-      setMsg({ type: 'danger', text: err.response?.data?.error || 'Error al eliminar.' });
     }
   };
 
@@ -111,12 +97,10 @@ export default function GestionarAdmins() {
                   onClick={() => setPassModal(a)}>
                   <i className="bi bi-key me-1"></i>Cambiar Contraseña
                 </button>
-                {a.id !== user?.id && (
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleEliminar(a)}>
-                    <i className="bi bi-trash"></i>
-                  </button>
-                )}
               </div>
+              <small className="text-muted mt-2 d-block">
+                <i className="bi bi-shield-lock me-1"></i>Por seguridad, no se permite eliminar cuentas de administrador.
+              </small>
             </div>
           </div>
         ))}

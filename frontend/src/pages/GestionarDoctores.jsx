@@ -3,6 +3,8 @@ import api from '../api';
 
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+const diaSemanaActual = () => (new Date().getDay() + 6) % 7;
+
 export default function GestionarDoctores() {
   const [doctores, setDoctores] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ export default function GestionarDoctores() {
   // Horarios
   const [horarioDoctor, setHorarioDoctor] = useState(null);
   const [horarios, setHorarios] = useState([]);
-  const [horarioForm, setHorarioForm] = useState({ dia_semana: 0, hora_entrada_esperada: '', hora_salida_esperada: '' });
+  const [horarioForm, setHorarioForm] = useState({ dia_semana: diaSemanaActual(), hora_entrada_esperada: '', hora_salida_esperada: '' });
 
   useEffect(() => { fetchDoctores(); }, []);
 
@@ -75,6 +77,7 @@ export default function GestionarDoctores() {
   // Horarios
   const openHorarios = async (doctor) => {
     setHorarioDoctor(doctor);
+    setHorarioForm({ dia_semana: diaSemanaActual(), hora_entrada_esperada: '', hora_salida_esperada: '' });
     try {
       const res = await api.get(`/doctores/${doctor.id}/horarios/`);
       setHorarios(res.data);
@@ -85,7 +88,7 @@ export default function GestionarDoctores() {
     e.preventDefault();
     try {
       await api.post(`/doctores/${horarioDoctor.id}/horarios/crear/`, horarioForm);
-      setHorarioForm({ dia_semana: 0, hora_entrada_esperada: '', hora_salida_esperada: '' });
+      setHorarioForm({ dia_semana: diaSemanaActual(), hora_entrada_esperada: '', hora_salida_esperada: '' });
       const res = await api.get(`/doctores/${horarioDoctor.id}/horarios/`);
       setHorarios(res.data);
       fetchDoctores();
