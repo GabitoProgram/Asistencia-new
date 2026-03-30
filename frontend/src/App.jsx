@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import GestionarDoctores from './pages/GestionarDoctores'
 import GestionarAdmins from './pages/GestionarAdmins'
+import Calendario from './pages/Calendario'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/doctores" element={<PrivateRoute><GestionarDoctores /></PrivateRoute>} />
           <Route path="/admins" element={<PrivateRoute><GestionarAdmins /></PrivateRoute>} />
+          <Route path="/calendario" element={<PrivateRoute><Calendario /></PrivateRoute>} />
         </Routes>
       </main>
       <Footer />

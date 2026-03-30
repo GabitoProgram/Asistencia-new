@@ -19,6 +19,8 @@ export default function Dashboard() {
     fecha_desde: fechaLocalISO(hace30Local),
     fecha_hasta: fechaLocalISO(hoyLocal),
     doctor_id: '',
+    doctor_ci: '',
+    doctor_nombre: '',
   });
   const [loading, setLoading] = useState(true);
 
@@ -64,6 +66,8 @@ export default function Dashboard() {
     if (filters.fecha_desde) params.set('fecha_desde', filters.fecha_desde);
     if (filters.fecha_hasta) params.set('fecha_hasta', filters.fecha_hasta);
     if (filters.doctor_id) params.set('doctor_id', filters.doctor_id);
+    if (filters.doctor_ci) params.set('doctor_ci', filters.doctor_ci);
+    if (filters.doctor_nombre) params.set('doctor_nombre', filters.doctor_nombre);
     return `/api/exportar/${type}/?${params}`;
   };
 
@@ -174,12 +178,12 @@ export default function Dashboard() {
       {/* Filtros */}
       <div className="card p-4 mb-4">
         <form onSubmit={handleFilter} className="row g-3 align-items-end">
-          <div className="col-md-3">
+          <div className="col-md-2">
             <label className="form-label fw-semibold">Desde</label>
             <input type="date" className="form-control" value={filters.fecha_desde}
               onChange={(e) => setFilters({ ...filters, fecha_desde: e.target.value })} />
           </div>
-          <div className="col-md-3">
+          <div className="col-md-2">
             <label className="form-label fw-semibold">Hasta</label>
             <input type="date" className="form-control" value={filters.fecha_hasta}
               onChange={(e) => setFilters({ ...filters, fecha_hasta: e.target.value })} />
@@ -187,24 +191,38 @@ export default function Dashboard() {
           <div className="col-md-2">
             <label className="form-label fw-semibold">Doctor</label>
             <select className="form-select" value={filters.doctor_id}
-              onChange={(e) => setFilters({ ...filters, doctor_id: e.target.value })}>
+              onChange={(e) => setFilters({ ...filters, doctor_id: e.target.value, doctor_ci: '', doctor_nombre: '' })}>
               <option value="">Todos</option>
               {data?.doctores?.map((d) => (
                 <option key={d.id} value={d.id}>Dr(a). {d.nombres} {d.apellidos}</option>
               ))}
             </select>
           </div>
-          <div className="col-md-4 d-flex gap-2 flex-wrap">
-            <button type="submit" className="btn text-white" style={{ background: '#1a1f71' }}>
+          <div className="col-md-2">
+            <label className="form-label fw-semibold">Buscar por CI</label>
+            <input type="text" className="form-control" placeholder="Ej: 12345678" 
+              value={filters.doctor_ci}
+              onChange={(e) => setFilters({ ...filters, doctor_ci: e.target.value, doctor_id: '', doctor_nombre: '' })} />
+          </div>
+          <div className="col-md-2">
+            <label className="form-label fw-semibold">Buscar por Nombre</label>
+            <input type="text" className="form-control" placeholder="Ej: Juan" 
+              value={filters.doctor_nombre}
+              onChange={(e) => setFilters({ ...filters, doctor_nombre: e.target.value, doctor_id: '', doctor_ci: '' })} />
+          </div>
+          <div className="col-md-2 d-flex gap-2 flex-wrap">
+            <button type="submit" className="btn btn-sm text-white w-100" style={{ background: '#1a1f71' }}>
               <i className="bi bi-filter me-1"></i>Filtrar
             </button>
-            <a href={exportUrl('excel')} className="btn text-white" style={{ background: '#16803d' }}>
+          </div>
+          <div className="col-12 d-flex gap-2 flex-wrap justify-content-end">
+            <a href={exportUrl('excel')} className="btn btn-sm text-white" style={{ background: '#16803d' }}>
               <i className="bi bi-file-earmark-excel me-1"></i>Excel
             </a>
-            <a href={exportUrl('pdf')} className="btn text-white" style={{ background: '#8b1a1a' }}>
+            <a href={exportUrl('pdf')} className="btn btn-sm text-white" style={{ background: '#8b1a1a' }}>
               <i className="bi bi-file-earmark-pdf me-1"></i>PDF
             </a>
-            <a href={exportUrl('csv')} className="btn btn-outline-secondary">
+            <a href={exportUrl('csv')} className="btn btn-sm btn-outline-secondary">
               <i className="bi bi-filetype-csv me-1"></i>CSV
             </a>
           </div>

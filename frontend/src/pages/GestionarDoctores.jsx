@@ -144,7 +144,7 @@ export default function GestionarDoctores() {
                 </div>
                 <div className="flex-grow-1">
                   <h6 className="mb-0 fw-bold">{d.apellidos} {d.nombres}</h6>
-                  <small className="text-muted">CI: {d.ci}</small>
+                  <small className="text-muted">ID: {d.id} | CI: {d.ci}</small>
                 </div>
                 <span className={`badge ${d.activo ? 'bg-success' : 'bg-danger'}`}>
                   {d.activo ? 'Activo' : 'Inactivo'}
