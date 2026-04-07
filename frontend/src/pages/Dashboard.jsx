@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
+import ImageModal from '../components/ImageModal';
 
 function fechaLocalISO(dateObj = new Date()) {
   const year = dateObj.getFullYear();
@@ -23,6 +24,8 @@ export default function Dashboard() {
     doctor_nombre: '',
   });
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -59,6 +62,16 @@ export default function Dashboard() {
   const handleFilter = (e) => {
     e.preventDefault();
     fetchData(filters);
+  };
+
+  const openImageModal = (imagePath) => {
+    setSelectedImage(imagePath);
+    setModalOpen(true);
+  };
+
+  const closeImageModal = () => {
+    setModalOpen(false);
+    setSelectedImage(null);
   };
 
   const exportUrl = (type) => {
@@ -286,14 +299,18 @@ export default function Dashboard() {
                         {a.firma_entrada ? (
                           <img src={`/media/${a.firma_entrada}`} alt="Firma"
                             style={{ width: 80, height: 40, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer' }}
-                            loading="lazy" />
+                            loading="lazy" 
+                            onClick={() => openImageModal(`/media/${a.firma_entrada}`)}
+                            title="Click para ampliar" />
                         ) : <span className="text-muted">—</span>}
                       </td>
                       <td>
                         {a.foto_entrada ? (
                           <img src={`/media/${a.foto_entrada}`} alt="Foto entrada"
-                            style={{ width: 80, height: 60, objectFit: 'cover', border: '1px solid #e2e8f0', borderRadius: 6 }}
-                            loading="lazy" />
+                            style={{ width: 80, height: 60, objectFit: 'cover', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer' }}
+                            loading="lazy"
+                            onClick={() => openImageModal(`/media/${a.foto_entrada}`)}
+                            title="Click para ampliar" />
                         ) : <span className="text-muted">—</span>}
                       </td>
                       <td>
@@ -307,14 +324,18 @@ export default function Dashboard() {
                         {a.firma_salida ? (
                           <img src={`/media/${a.firma_salida}`} alt="Firma"
                             style={{ width: 80, height: 40, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer' }}
-                            loading="lazy" />
+                            loading="lazy"
+                            onClick={() => openImageModal(`/media/${a.firma_salida}`)}
+                            title="Click para ampliar" />
                         ) : <span className="text-muted">—</span>}
                       </td>
                       <td>
                         {a.foto_salida ? (
                           <img src={`/media/${a.foto_salida}`} alt="Foto salida"
-                            style={{ width: 80, height: 60, objectFit: 'cover', border: '1px solid #e2e8f0', borderRadius: 6 }}
-                            loading="lazy" />
+                            style={{ width: 80, height: 60, objectFit: 'cover', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer' }}
+                            loading="lazy"
+                            onClick={() => openImageModal(`/media/${a.foto_salida}`)}
+                            title="Click para ampliar" />
                         ) : <span className="text-muted">—</span>}
                       </td>
                     </tr>
@@ -325,6 +346,13 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <ImageModal 
+        isOpen={modalOpen} 
+        imageSrc={selectedImage} 
+        imageAlt="Imagen ampliada" 
+        onClose={closeImageModal} 
+      />
     </>
   );
 }
