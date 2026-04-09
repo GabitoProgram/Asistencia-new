@@ -60,6 +60,11 @@ export default function Navbar() {
                     <i className="bi bi-calendar-event me-1"></i>Calendario
                   </Link>
                 </li>
+                <li className="nav-item">
+                  <Link className={`nav-link ${isActive('/reportes-cambios-horarios')}`} to="/reportes-cambios-horarios">
+                    <i className="bi bi-clock-history me-1"></i>Reportes
+                  </Link>
+                </li>
                 <li className="nav-item ms-2">
                   <span className="nav-link d-flex align-items-center gap-2">
                     <small className="opacity-75">{user.username}</small>

@@ -10,6 +10,7 @@ export default function ListaDoctores() {
   const [modal, setModal] = useState(null); // { doctorId, horarioId, doctorNombre, tipo }
   const [saving, setSaving] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [busquedaCI, setBusquedaCI] = useState('');
   const canvasRef = useRef(null);
   const padRef = useRef(null);
   const videoRef = useRef(null);
@@ -152,6 +153,13 @@ export default function ListaDoctores() {
   });
   const diaSemanaTexto = DIAS_JS[fechaReferencia.getDay()];
 
+  // Filtrar doctores por búsqueda de CI
+  const doctoresFiltrados = busquedaCI.trim() === '' 
+    ? data.doctores_info 
+    : data.doctores_info.filter(({ doctor }) => 
+        doctor.ci.toLowerCase().includes(busquedaCI.toLowerCase())
+      );
+
   return (
     <>
       {/* Encabezado */}
@@ -182,17 +190,49 @@ export default function ListaDoctores() {
         </div>
       </div>
 
+      {/* Buscador por CI */}
+      <div className="card p-4 mb-4" style={{ borderLeft: '4px solid #1a1f71' }}>
+        <div className="input-group">
+          <span className="input-group-text bg-white border-end-0" style={{ borderColor: '#ddd' }}>
+            <i className="bi bi-search" style={{ color: '#1a1f71' }}></i>
+          </span>
+          <input 
+            type="text" 
+            className="form-control border-start-0" 
+            placeholder="Buscar doctor por C.I. (ej: 12345678)"
+            value={busquedaCI}
+            onChange={(e) => setBusquedaCI(e.target.value)}
+            style={{ borderColor: '#ddd' }}
+          />
+          {busquedaCI && (
+            <button 
+              className="btn btn-outline-secondary" 
+              onClick={() => setBusquedaCI('')}
+              title="Limpiar búsqueda"
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
+          )}
+        </div>
+        {busquedaCI && (
+          <small className="text-muted d-block mt-2">
+            <i className="bi bi-info-circle me-1"></i>
+            Se encontraron <strong>{doctoresFiltrados.length}</strong> resultado(s)
+          </small>
+        )}
+      </div>
+
       {/* Lista de Doctores */}
       <div className="row g-3">
-        {data.doctores_info.length === 0 ? (
+        {doctoresFiltrados.length === 0 ? (
           <div className="col-12">
             <div className="alert alert-info text-center">
               <i className="bi bi-info-circle me-2"></i>
-              No hay doctores con horario programado para hoy.
+              {busquedaCI ? 'No se encontraron doctores con ese C.I.' : 'No hay doctores con horario programado para hoy.'}
             </div>
           </div>
         ) : (
-          data.doctores_info.map(({ doctor, turnos }) => (
+          doctoresFiltrados.map(({ doctor, turnos }) => (
             <div key={doctor.id} className="col-12">
               <div className="card">
                 <div className="card-body px-4 py-3">

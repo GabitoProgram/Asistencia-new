@@ -19,6 +19,8 @@ export default function GestionarDoctores() {
   const [horarioDoctor, setHorarioDoctor] = useState(null);
   const [horarios, setHorarios] = useState([]);
   const [horarioForm, setHorarioForm] = useState({ dia_semana: diaSemanaActual(), hora_entrada_esperada: '', hora_salida_esperada: '' });
+  const [editingHorario, setEditingHorario] = useState(null);
+  const [editingHorarioForm, setEditingHorarioForm] = useState({ dia_semana: '', hora_entrada_esperada: '', hora_salida_esperada: '' });
 
   useEffect(() => { fetchDoctores(); }, []);
 
@@ -106,6 +108,32 @@ export default function GestionarDoctores() {
     } catch (err) {
       alert(err.response?.data?.error || 'Error al eliminar horario.');
     }
+  };
+
+  const startEditingHorario = (horario) => {
+    setEditingHorario(horario.id);
+    setEditingHorarioForm({
+      dia_semana: horario.dia_semana,
+      hora_entrada_esperada: horario.hora_entrada_esperada,
+      hora_salida_esperada: horario.hora_salida_esperada,
+    });
+  };
+
+  const saveEditHorario = async (horarioId) => {
+    try {
+      await api.put(`/horarios/${horarioId}/editar/`, editingHorarioForm);
+      setEditingHorario(null);
+      const res = await api.get(`/doctores/${horarioDoctor.id}/horarios/`);
+      setHorarios(res.data);
+      fetchDoctores();
+    } catch (err) {
+      alert(err.response?.data?.error || 'Error al actualizar horario.');
+    }
+  };
+
+  const cancelEditingHorario = () => {
+    setEditingHorario(null);
+    setEditingHorarioForm({ dia_semana: '', hora_entrada_esperada: '', hora_salida_esperada: '' });
   };
 
   if (loading) return <div className="d-flex justify-content-center py-5"><div className="spinner-border text-primary"></div></div>;
@@ -300,14 +328,50 @@ export default function GestionarDoctores() {
                     ) : (
                       horarios.map((h) => (
                         <tr key={h.id}>
-                          <td><span className="badge bg-primary">{DIAS[h.dia_semana]}</span></td>
-                          <td>{h.hora_entrada_esperada?.slice(0, 5)}</td>
-                          <td>{h.hora_salida_esperada?.slice(0, 5)}</td>
-                          <td>
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => deleteHorario(h.id)}>
-                              <i className="bi bi-trash"></i>
-                            </button>
-                          </td>
+                          {editingHorario === h.id ? (
+                            <>
+                              <td>
+                                <select className="form-select form-select-sm" value={editingHorarioForm.dia_semana}
+                                  onChange={(e) => setEditingHorarioForm({ ...editingHorarioForm, dia_semana: parseInt(e.target.value) })}>
+                                  {DIAS.map((d, i) => <option key={i} value={i}>{d}</option>)}
+                                </select>
+                              </td>
+                              <td>
+                                <input type="time" className="form-control form-control-sm" value={editingHorarioForm.hora_entrada_esperada}
+                                  onChange={(e) => setEditingHorarioForm({ ...editingHorarioForm, hora_entrada_esperada: e.target.value })} />
+                              </td>
+                              <td>
+                                <input type="time" className="form-control form-control-sm" value={editingHorarioForm.hora_salida_esperada}
+                                  onChange={(e) => setEditingHorarioForm({ ...editingHorarioForm, hora_salida_esperada: e.target.value })} />
+                              </td>
+                              <td>
+                                <button className="btn btn-sm btn-outline-success me-1" onClick={() => saveEditHorario(h.id)}
+                                  title="Guardar">
+                                  <i className="bi bi-check-lg"></i>
+                                </button>
+                                <button className="btn btn-sm btn-outline-secondary" onClick={cancelEditingHorario}
+                                  title="Cancelar">
+                                  <i className="bi bi-x-lg"></i>
+                                </button>
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td><span className="badge bg-primary">{DIAS[h.dia_semana]}</span></td>
+                              <td>{h.hora_entrada_esperada?.slice(0, 5)}</td>
+                              <td>{h.hora_salida_esperada?.slice(0, 5)}</td>
+                              <td>
+                                <button className="btn btn-sm btn-outline-warning me-1" onClick={() => startEditingHorario(h)}
+                                  title="Editar">
+                                  <i className="bi bi-pencil"></i>
+                                </button>
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => deleteHorario(h.id)}
+                                  title="Eliminar">
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              </td>
+                            </>
+                          )}
                         </tr>
                       ))
                     )}

@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import GestionarDoctores from './pages/GestionarDoctores'
 import GestionarAdmins from './pages/GestionarAdmins'
 import Calendario from './pages/Calendario'
+import ReportesCambiosHorarios from './pages/ReportesCambiosHorarios'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/doctores" element={<PrivateRoute><GestionarDoctores /></PrivateRoute>} />
           <Route path="/admins" element={<PrivateRoute><GestionarAdmins /></PrivateRoute>} />
           <Route path="/calendario" element={<PrivateRoute><Calendario /></PrivateRoute>} />
+          <Route path="/reportes-cambios-horarios" element={<PrivateRoute><ReportesCambiosHorarios /></PrivateRoute>} />
         </Routes>
       </main>
       <Footer />
