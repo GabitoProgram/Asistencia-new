@@ -156,3 +156,95 @@ npm run dev
 | bootstrap | Estilos CSS |
 | bootstrap-icons | Iconos |
 | signature_pad | Captura de firma digital |
+
+---
+
+## 📚 Documentación Técnica de Análisis
+
+Se incluyen 3 documentos de referencia completos que mapean toda la arquitectura del sistema:
+
+### 1. 📋 [ANALISIS_ARQUITECTURA.md](./ANALISIS_ARQUITECTURA.md)
+**Análisis completo de la arquitectura del sistema**
+- ✅ Dónde se captura firma y foto (componentes React)
+- ✅ Modelo de datos Asistencia (estructura BD)
+- ✅ APIs e endpoints para guardar asistencias
+- ✅ Serializers para conversión JSON
+- ✅ Exportación y visualización de reportes
+- ✅ Rutas API completas (todos los endpoints)
+- ✅ Flujo completo: captura → almacenamiento → visualización
+
+**Ideal para:** Entender la arquitectura general, qué archivo hace qué.
+
+---
+
+### 2. 🔌 [EJEMPLOS_API.md](./EJEMPLOS_API.md)
+**Ejemplos prácticos de request/response y flujos**
+- ✅ Ejemplos reales de POST/GET con JSON
+- ✅ Estructura de directorios de almacenamiento (firmas/fotos)
+- ✅ Tabla de Asistencia en BD (estructura SQL)
+- ✅ Validaciones en backend (día, hora, duplicados)
+- ✅ Ciclo de vida: captura → guardado → refresco UI
+- ✅ Tabla comparativa: CSV vs Excel vs PDF
+- ✅ Contexto de autenticación (tokens CSRF)
+
+**Ideal para:** Desarrolladores que necesitan integración, debugging.
+
+---
+
+### 3. ⚡ [REFERENCIA_RAPIDA.md](./REFERENCIA_RAPIDA.md)
+**Referencia rápida por funcionalidad**
+- ✅ Tabla "Búsqueda por funcionalidad" (¿Dónde está X?)
+- ✅ Tabla de rutas API completa (visual ASCII)
+- ✅ Ciclo completo en diagrama ASCII
+- ✅ Resumen ejecutivo (componentes, BD, almacenamiento)
+- ✅ Checklist: entender el flujo
+- ✅ Archivos más importantes por función
+- ✅ Debugging: cómo verificar
+- ✅ Errores comunes + soluciones
+
+**Ideal para:** Búsquedas rápidas, referencia visual, troubleshooting.
+
+---
+
+## 🎯 Guía rápida - "¿Dónde está X?"
+
+### Captura de firma
+**Archivo:** `frontend/src/pages/ListaDoctores.jsx` (línea 26-31)
+- Usa `signature_pad` librería (Canvas HTML5)
+- Modal con SignaturePad + cámara web
+
+### Captura de foto
+**Archivo:** `frontend/src/pages/ListaDoctores.jsx` (línea 77-91)
+- `navigator.mediaDevices.getUserMedia()` API
+- Conversión a Base64 vía Canvas
+
+### API para guardar firma/foto
+**Endpoint:** `POST /api/firmar/<doctor_id>/<horario_id>/<tipo>/`
+**Archivo:** `asistencia2/mi_app/api_views.py` (línea 91-193)
+- Decodifica Base64
+- Guarda archivos en `media/firmas/` y `media/fotos/`
+- Actualiza modelo Asistencia en BD
+
+### Modelo Asistencia
+**Archivo:** `asistencia2/mi_app/models.py` (línea 54-88)
+- Campos: firma_entrada, foto_entrada, firma_salida, foto_salida
+- También: hora_entrada, hora_salida, doctor (FK), horario (FK)
+
+### Dashboard - Visualización
+**Archivo:** `frontend/src/pages/Dashboard.jsx`
+- Tabla de asistencias con thumbnails
+- `ImageModal.jsx` para fullscreen
+
+### Exportación (CSV/Excel/PDF)
+**Archivo:** `asistencia2/mi_app/api_views.py`
+- CSV: línea 327-383
+- Excel: línea 391-515 (con imágenes)
+- PDF: línea 517-750 (con imágenes)
+
+---
+
+## 🚀 Comienza aquí
+
+1. **Primer vistazo:** Lee [REFERENCIA_RAPIDA.md](./REFERENCIA_RAPIDA.md)
+2. **Entender flujo:** Revisa [ANALISIS_ARQUITECTURA.md](./ANALISIS_ARQUITECTURA.md)
+3. **Implementar/Debuggear:** Consulta [EJEMPLOS_API.md](./EJEMPLOS_API.md)

@@ -9,17 +9,42 @@ export function AuthProvider({ children }) {
 
   // Restaurar sesión al cargar la página
   useEffect(() => {
-    api.get('/auth/me/')
-      .then((res) => {
+    const verifySession = async () => {
+      try {
+        const res = await api.get('/auth/me/');
         if (res.data.authenticated) {
           setUser(res.data.user);
+        } else {
+          setUser(null);
         }
-      })
-      .catch(() => {
-        // Sin sesión activa
-      })
-      .finally(() => setLoading(false));
+      } catch (error) {
+        console.error('Error al verificar sesión:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    verifySession();
   }, []);
+
+  // Verificar sesión cada 2 minutos (verificación ligera)
+  useEffect(() => {
+    if (loading) return;
+
+    const sessionCheckInterval = setInterval(async () => {
+      try {
+        const res = await api.get('/auth/me/');
+        if (!res.data.authenticated) {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error al verificar sesión:', error);
+      }
+    }, 120000); // Verificar cada 2 minutos
+
+    return () => clearInterval(sessionCheckInterval);
+  }, [loading]);
 
   const loginUser = async (username, password) => {
     const res = await api.post('/auth/login/', { username, password });

@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import PrivateRoute from './components/PrivateRoute'
@@ -11,6 +12,13 @@ import Calendario from './pages/Calendario'
 import ReportesCambiosHorarios from './pages/ReportesCambiosHorarios'
 
 function App() {
+  const { loading } = useAuth();
+
+  // Mostrar un spinner mínimo mientras carga
+  if (loading) {
+    return null; // Sin renderizar nada hasta verificar sesión
+  }
+
   return (
     <>
       <Navbar />

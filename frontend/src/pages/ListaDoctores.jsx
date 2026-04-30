@@ -122,12 +122,35 @@ export default function ListaDoctores() {
     }
     setSaving(true);
     try {
+      // NUEVO: Obtener coordenadas GPS
+      let latitud = null, longitud = null;
+      
+      if (navigator.geolocation) {
+        try {
+          const posicion = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+          });
+          latitud = posicion.coords.latitude;
+          longitud = posicion.coords.longitude;
+        } catch (err) {
+          alert(' No se pudo obtener tu ubicación. Por favor activar GPS/ubicación en tu dispositivo.');
+          setSaving(false);
+          return;
+        }
+      } else {
+        alert(' Este dispositivo no soporta GPS.');
+        setSaving(false);
+        return;
+      }
+
       const firmaBase64 = padRef.current.toDataURL('image/png');
       const fotoBase64 = await capturarFotoConTimeout(4000);
 
       await api.post(`/firmar/${modal.doctorId}/${modal.horarioId}/${modal.tipo}/`, {
         firma: firmaBase64,
         foto: fotoBase64,
+        latitud,
+        longitud,
       });
       setModal(null);
       detenerCamara();
@@ -368,7 +391,7 @@ export default function ListaDoctores() {
                 <button className="btn btn-secondary" onClick={() => setModal(null)} disabled={saving}>Cancelar</button>
                 <button className="btn btn-primary fw-bold px-4" onClick={guardarFirma} disabled={saving}>
                   {saving ? (
-                    <><span className="spinner-border spinner-border-sm me-2"></span>Guardando firma y foto (3-4 segundos)...</>
+                    <><span className="spinner-border spinner-border-sm me-2"></span>Guardando firma (3-4 segundos)...</>
                   ) : (
                     <><i className="bi bi-save me-1"></i>Guardar Firma</>
                   )}

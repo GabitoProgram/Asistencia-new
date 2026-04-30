@@ -260,9 +260,11 @@ export default function Dashboard() {
                   <th>Fecha</th>
                   <th>Turno</th>
                   <th>Hora Entrada</th>
+                  <th>Ubicación Entrada</th>
                   <th>Firma Entrada</th>
                   <th>Foto Entrada</th>
                   <th>Hora Salida</th>
+                  <th>Ubicación Salida</th>
                   <th>Firma Salida</th>
                   <th>Foto Salida</th>
                 </tr>
@@ -270,7 +272,7 @@ export default function Dashboard() {
               <tbody>
                 {data?.asistencias?.length === 0 ? (
                   <tr>
-                    <td colSpan="10" className="text-center py-4 text-muted">
+                    <td colSpan="12" className="text-center py-4 text-muted">
                       <i className="bi bi-inbox fs-3 d-block mb-2"></i>
                       No hay registros para el rango seleccionado
                     </td>
@@ -296,6 +298,11 @@ export default function Dashboard() {
                         ) : <span className="text-muted">—</span>}
                       </td>
                       <td>
+                        <small className="text-muted d-block" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.direccion_entrada || (a.latitud_entrada ? `${a.latitud_entrada}, ${a.longitud_entrada}` : '')}>
+                          {a.direccion_entrada || (a.latitud_entrada ? `${a.latitud_entrada.toFixed(4)}, ${a.longitud_entrada.toFixed(4)}` : '—')}
+                        </small>
+                      </td>
+                      <td>
                         {a.firma_entrada ? (
                           <img src={`/media/${a.firma_entrada}`} alt="Firma"
                             style={{ width: 80, height: 40, objectFit: 'contain', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer' }}
@@ -319,6 +326,11 @@ export default function Dashboard() {
                             {new Date(a.hora_salida).toLocaleTimeString('es-BO')}
                           </span>
                         ) : <span className="text-muted">—</span>}
+                      </td>
+                      <td>
+                        <small className="text-muted d-block" style={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={a.direccion_salida || (a.latitud_salida ? `${a.latitud_salida}, ${a.longitud_salida}` : '')}>
+                          {a.direccion_salida || (a.latitud_salida ? `${a.latitud_salida.toFixed(4)}, ${a.longitud_salida.toFixed(4)}` : '—')}
+                        </small>
                       </td>
                       <td>
                         {a.firma_salida ? (
